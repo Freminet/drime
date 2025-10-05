@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis of Drime Cloud's E2EE and Zero-Knowledge Claims</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: Georgia, serif;
+            line-height: 1.8;
+            color: #333;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        h2 {
+            font-size: 22px;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-weight: normal;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        p {
+            margin: 15px 0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        code {
+            font-family: monospace;
+        }
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        blockquote {
+            margin: 20px 0;
+            padding: 10px 20px;
+            border-left: 3px solid #ccc;
+            background: #f9f9f9;
+            font-style: italic;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #f5f5f5;
+        }
+        a {
+            color: #0066cc;
+        }
+        .date {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .evidence-image {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            display: block;
+        }
+        .image-caption {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Analysis of Drime Cloud's E2EE and Zero-Knowledge Claims</h1>
+    <p class="date">October 2025</p>
+
+    <h2>Summary</h2>
+    <p>This document examines the encryption claims made by Drime Cloud regarding their "Vault" feature. Through API analysis, I found significant discrepancies between their marketing statements and the actual implementation.</p>
+
+    <p>Drime Cloud advertises their Vault as having "zero-knowledge" and "end-to-end encryption," stating that "Only you can see your files. Not us, not anyone else." However, API responses show that all file and folder metadata is transmitted in plaintext to their servers.</p>
+
+    <h2>Background</h2>
+    <p>Drime Cloud is a file storage service based in the European Union. Their Vault feature is marketed as a secure, encrypted storage solution for sensitive files. The service claims to implement zero-knowledge encryption, which typically means that the service provider cannot access any user data, including metadata.</p>
+
+    <h2>Marketing Claims</h2>
+    <p>The following statements appear on Drime's official website at drime.cloud/vault:</p>
+
+    <blockquote>
+        "Drime end-to-end encrypted (E2EE) Vault provide the most secure way to store your most sensitive files in the cloud."
+    </blockquote>
+
+    <blockquote>
+        "Zero-knowledge: Only you can see your files. Not us, not anyone else. We don't store passwords, and we can't access your data."
+    </blockquote>
+
+    <blockquote>
+        "Your files are encrypted on your device and never leave it unprotected. Only you can access them, not even Drime."
+    </blockquote>
+
+    <img src="screenshots/zero_knowledge_claim.png" alt="Drime marketing claim screenshot 1" class="evidence-image">
+    <p class="image-caption">Figure 1: Drime's "Zero-knowledge" marketing claim</p
+
+    <h2>Technical Analysis</h2>
+    <p>When accessing the Vault feature, the client makes an API request to:</p>
+    <pre>https://app.drime.cloud/api/v1/vault/file-entries</pre>
+
+    <p>The response contains the following data structure:</p>
+
+    <pre>{
+    "id": 26833,
+    "name": "My Confidential Tax Documents",
+    "description": null,
+    "file_name": "2024_tax_return.pdf",
+    "mime": "application/pdf",
+    "file_size": 2547891,
+    "type": "folder",
+    "extension": "pdf",
+    "created_at": "2025-10-03T19:45:30.000000Z",
+    "updated_at": "2025-10-05T16:38:35.000000Z",
+    "path": "26833",
+    "vault_id": 440,
+    "is_encrypted": 1
+}</pre>
+
+    <h3>Exposed Metadata</h3>
+    <p>The API response reveals the following information in plaintext:</p>
+
+    <ul>
+        <li>Complete file and folder names</li>
+        <li>File descriptions</li>
+        <li>MIME types and file extensions</li>
+        <li>Exact file sizes in bytes</li>
+        <li>Complete directory structure</li>
+        <li>Creation and modification timestamps</li>
+        <li>Access patterns</li>
+    </ul>
+
+    <p>The response includes an "is_encrypted" flag set to 1, which appears to indicate that file contents are encrypted, but not the metadata.</p>
+
+    <img src="screenshots/api_response.png" alt="API response showing plaintext metadata" class="evidence-image">
+    <p class="image-caption">Figure 2: API response showing unencrypted metadata in browser DevTools</p>
+
+    <h2>Comparison with Industry Standards</h2>
+    <p>True zero-knowledge encryption implementations encrypt metadata on the client side before transmission. For comparison, pCloud's Crypto Folder service returns encrypted filenames:</p>
+
+    <pre>{
+    "name": "CM4LSAOHWDTXNPEJF2XZA67KOPDJ5XOJWACR3JVTT4KK3DRQBAE5RHIY4Z4IUKSDO4AM4ZODDSH7S",
+    "encrypted": true,
+    "contenttype": "application/octet-stream"
+}</pre>
+
+    <p>Other services implementing true zero-knowledge encryption include:</p>
+    <ul>
+        <li>Proton Drive - Uses PGP-based encryption for all metadata</li>
+        <li>Tresorit - Client-side encryption of filenames and folder structure</li>
+    </ul>
+
+    <img src="screenshots/pcloud_comparison.png" alt="pCloud Crypto encrypted filename comparison" class="evidence-image">
+    <p class="image-caption">Figure 3: pCloud Crypto folder showing encrypted filename vs Drime's plaintext</p>
+
+    <h2>Privacy Implications</h2>
+    <p>The exposure of metadata has significant privacy implications:</p>
+
+    <table>
+        <tr>
+            <th>Information Type</th>
+            <th>Visible to Drime</th>
+            <th>Privacy Risk</th>
+        </tr>
+        <tr>
+            <td>File names</td>
+            <td>Yes</td>
+            <td>Reveals document subject matter</td>
+        </tr>
+        <tr>
+            <td>Folder structure</td>
+            <td>Yes</td>
+            <td>Shows organization and categories</td>
+        </tr>
+        <tr>
+            <td>File types</td>
+            <td>Yes</td>
+            <td>Indicates content nature (medical, financial, etc.)</td>
+        </tr>
+        <tr>
+            <td>Access times</td>
+            <td>Yes</td>
+            <td>Behavioral patterns and frequency</td>
+        </tr>
+        <tr>
+            <td>File sizes</td>
+            <td>Yes</td>
+            <td>Can infer content complexity</td>
+        </tr>
+    </table>
+
+    <p>This metadata can be:</p>
+    <ul>
+        <li>Accessed by Drime employees</li>
+        <li>Subpoenaed by law enforcement</li>
+        <li>Exposed in the event of a data breach</li>
+        <li>Used for internal analytics or profiling</li>
+    </ul>
+
+    <h2>Additional Security Concern</h2>
+    <p>The vault_id field uses sequential integers (440, 441, 442, etc.). This implementation allows any user to determine the total number of vaults created system-wide by creating and deleting vaults and observing the increment. This is a minor information disclosure that violates common security practices. Standard implementations use UUIDs or random identifiers to prevent enumeration.</p>
+
+    <img src="screenshots/vault_id_exposed.png" alt="Sequential vault_id demonstration" class="evidence-image">
+    <p class="image-caption">Figure 4: Sequential vault_id allowing enumeration of total vaults</p>
+
+    <h2>Reproduction Steps</h2>
+    <p>The findings can be verified using the following process:</p>
+
+    <ol>
+        <li>Create a Drime account and enable the Vault feature</li>
+        <li>Create folders with descriptive names (e.g., "Personal Medical Records")</li>
+        <li>Upload files with recognizable filenames</li>
+        <li>Open browser developer tools (F12) and navigate to the Network tab</li>
+        <li>Access the Vault by entering the vault password</li>
+        <li>Locate the API request to /api/v1/vault/file-entries</li>
+        <li>Examine the JSON response body</li>
+    </ol>
+
+    <p>All metadata will be visible in plaintext in the response.</p>
+
+    <h2>Company Response</h2>
+    <p>When these findings were initially reported, Drime's team responded with the following statement:</p>
+
+    <blockquote>
+        "Drime Vault is a new feature, and we've already addressed these concerns. The file content is fully end-to-end encrypted, it's encrypted on your device before being uploaded. Some providers use the term 'zero knowledge,' which usually means that even metadata is encrypted. We plan to bring this level as well once Vault is fully stable."
+    </blockquote>
+
+    <p>In a subsequent response, they stated:</p>
+
+    <blockquote>
+        "We do not claim 'zero knowledge', and we've already clarified this in past discussions when asked."
+    </blockquote>
+
+    <p>This statement contradicts their marketing page, which explicitly includes a section titled "Zero-knowledge" with claims about data access.</p>
+
+    <img src="screenshots/company_response.png" alt="Drime team response denying zero-knowledge claims" class="evidence-image">
+    <p class="image-caption">Figure 5: Drime's response claiming they "do not claim 'zero knowledge'"</p>
+
+    <div class="note">
+        <strong>Note on Censorship:</strong> After posting these findings on Reddit, my account was permanently banned( report botted? who knows ) and the post was removed along with Drime Team's response. This occurred shortly after the Drime team responded to the initial report.
+    </div>
+
+    <h2>Legal and Regulatory Considerations</h2>
+    <p>Drime Cloud operates in the European Union and markets services to EU citizens. The discrepancy between marketing claims and actual implementation may raise concerns under several regulatory frameworks:</p>
+
+    <ul>
+        <li>GDPR Article 5 requires accuracy and transparency in data processing claims</li>
+        <li>The Unfair Commercial Practices Directive prohibits misleading advertising</li>
+        <li>Consumer protection laws require truthful product representations</li>
+    </ul>
+
+    <p>The use of terms like "zero-knowledge" and statements such as "Not us, not anyone else" while maintaining server-side visibility of metadata could be considered misleading to consumers making security decisions.</p>
+
+    <h2>Recommendations</h2>
+    <p>For Drime Cloud:</p>
+    <ul>
+        <li>Update marketing materials to accurately reflect what data is and is not encrypted</li>
+        <li>Remove or clarify the "zero-knowledge" claims until metadata encryption is implemented</li>
+        <li>Provide clear documentation about what information is visible to the service</li>
+        <li>Implement UUID-based identifiers instead of sequential integers</li>
+        <li>Provide a specific timeline for implementing metadata encryption</li>
+    </ul>
+
+    <p>For users considering Drime Vault:</p>
+    <ul>
+        <li>Understand that file and folder names are visible to Drime's servers</li>
+        <li>Assume metadata can be accessed by the company and legal authorities</li>
+        <li>Consider whether the current level of encryption meets your threat model</li>
+        <li>Evaluate alternative services if metadata privacy is critical</li>
+    </ul>
+
+    <h2>Conclusion</h2>
+    <p>Drime Vault appears to implement encryption-at-rest for file contents, which provides some level of protection. However, the implementation does not meet the industry standard definition of "zero-knowledge" encryption, which requires that metadata also be encrypted client-side before transmission.</p>
+
+    <p>The marketing materials make explicit claims that contradict the technical implementation. Users who choose Drime Vault based on these claims may have a false sense of security regarding their metadata privacy.</p>
+
+    <p>Transparency in security claims is essential for users to make informed decisions about their data. Services should accurately represent their capabilities, particularly when dealing with sensitive information.</p>
+
+    <hr>
+    <p><small>This analysis was conducted in October 2025. All evidence has been archived and is available for verification. For questions or additional information, please refer to the accompanying repository.</small></p>
+</body>
+</html>
