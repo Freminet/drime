@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analysis of Drime Cloud's E2EE and Zero-Knowledge Claims</title>
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             max-width: 800px;
             margin: 40px auto;
@@ -65,6 +68,22 @@
             padding: 15px;
             margin: 20px 0;
         }
+        .drime-message {
+            background: #fff5f5;
+            border: 2px solid #d32f2f;
+            padding: 20px;
+            margin: 20px 0;
+            color: #b71c1c;
+        }
+        .drime-message strong {
+            color: #d32f2f;
+        }
+        .drime-message h3 {
+            color: #d32f2f;
+            margin-top: 0;
+            border-bottom: 1px solid #ffcdd2;
+            padding-bottom: 10px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -99,11 +118,46 @@
             margin-top: 5px;
             text-align: center;
         }
+        .update-section {
+            border-top: 4px solid #333;
+            margin-top: 60px;
+            padding-top: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>Analysis of Drime Cloud's E2EE and Zero-Knowledge Claims</h1>
-    <p class="date">October 2025</p>
+    <p class="date">Original Report: October 2025 | Updated: November 2025</p>
+
+    <div class="note">
+        <strong>Status Update:</strong> This report has been updated with significant new findings regarding the underlying software architecture ("BeDrive") and proof of artificial data inflation. See <a href="#part2">"Part 2"</a> below.
+        <br><br>This page isn't made to shame Drime, but to ensure users understand what they're actually getting. 
+    </div>
+
+    <div class="drime-message">
+        <h3>Message to Drime</h3>
+        
+        <!-- Placeholder for Reddit Comment Screenshot -->
+        <img src="screenshots/reddit_comment.png" alt="Screenshot of Drime's Reddit Comment" class="evidence-image" style="border: 1px solid #ffcdd2;">
+        
+        <p><strong>You said:</strong> "Only metadata is not E2EE for technical reasons."</p>
+        <p><strong>Translation:</strong> "The $29 script we bought (BeDrive) wasn't built to encrypt filenames, and we don't know how to rewrite the core database logic to fix it."</p>
+        <hr style="border: 0; border-top: 1px dashed #ffcdd2; margin: 20px 0;">
+        
+        <p>The claim that 'File contents are fully E2EE and cannot be read server-side' contradicts the API evidence:</p>
+        
+        <ul>
+            <li><strong>The IV:</strong> The API returns an exposed <code>iv</code> (Initialization Vector) field in the database row. In true Client-Side E2EE, the IV is bundled into the encrypted blob and managed by the client. An exposed database IV is the hallmark of Server-Side Encryption (standard Laravel/PHP encryption).</li>
+            
+            <li><strong>Keys:</strong> If the server is generating/storing the IV and validating the password hash (<code>check</code> field), the server is an active participant in the cryptography. This means the server holds the keys.</li>
+            
+            <li><strong>Meaning?:</strong> While you can theoretically have E2EE with plaintext metadata, you are conflating 'End-to-End Encryption' with 'Encryption at Rest.' If the server holds the keys (which the BeDrive architecture does), it is Encryption at Rest, not E2EE.</li>
+        </ul>
+        <p>If the server stores the salt, the password check, and the per-file IVs and can validate whether the vault password is correct, then the server can derive the encryption key and decrypt the files. That means the system is not end-to-end encrypted, even if the metadata or file contents are encrypted.</p>
+        <p>Drime founder doesn't seem to know the difference between E2EE and Encryption at Rest.</p>
+        <p><strong>Please explain why the database stores a separate IV if the encryption is truly happening entirely on the client device.</strong></p>
+        <a href="mailto:sylphie@tuta.io">sylphie@tuta.io</a>
+    </div>
 
     <h2>Summary</h2>
     <p>This document examines the encryption claims made by Drime Cloud regarding their "Vault" feature. Through API analysis, I found significant discrepancies between their marketing statements and the actual implementation.</p>
@@ -135,6 +189,7 @@
         <br><br>
         Drime hasn't sent any notification of this change to their users and silently removed the "Zero-knowledge" claim from their website.
     </div>
+
     <h2>Technical Analysis</h2>
     <p>When accessing the Vault feature, the client makes an API request to:</p>
     <pre>https://app.drime.cloud/api/v1/vault/file-entries</pre>
@@ -309,14 +364,89 @@
         <li>Evaluate alternative services if metadata privacy is critical</li>
     </ul>
 
-    <h2>Conclusion</h2>
+    <h2>Conclusion (Part 1)</h2>
     <p>Drime Vault appears to implement encryption-at-rest for file contents, which provides some level of protection. However, the implementation does not meet the industry standard definition of "zero-knowledge" encryption, which requires that metadata also be encrypted client-side before transmission.</p>
 
-    <p>The marketing materials make explicit claims that contradict the technical implementation. Users who choose Drime Vault based on these claims may have a false sense of security regarding their metadata privacy.</p>
+    <div class="update-section" id="part2">
+        <h1>Part 2: Investigation Update (November 2025)</h1>
+        
+        <h2>The "BeDrive" Connection</h2>
+        <p>Following the initial report, further API analysis has identified that Drime Cloud appears to be running a white-labeled version of <strong>BeDrive</strong>, a generic PHP file-sharing script available on CodeCanyon for approximately $29. The API endpoints and backend structure match BeDrive's architecture by approximately 95-98%.</p>
 
-    <p>Transparency in security claims is essential for users to make informed decisions about their data. Services should accurately represent their capabilities, particularly when dealing with sensitive information.</p>
+        <h2>1. The "Military-Grade" Hash Analysis</h2>
+        <p>The file identifiers used by Drime are not cryptographically secure hashes. The API returns a "hash" field that, when analyzed, reveals simple obfuscation rather than encryption.</p>
+        
+        <p><strong>API Response:</strong></p>
+        <pre>"hash": "MzQ0NDZ8cGFkZA"</pre>
+        
+        <p><strong>Decoded (Base64):</strong></p>
+        <pre>34446|padd</pre>
+        
+        <p>This matches the exact PHP source code found in the BeDrive script, which manually pads the ID with the word "padding":</p>
+        <pre>public function getHashAttribute(): string {
+    return trim(base64_encode(str_pad($this->getRawOriginal('id').'|', 10, 'padding')), '=');
+}</pre>
+        
+        <p>This proves that the "secure hash" is merely the sequential database ID encoded in Base64. It is reversible and allows for enumeration of files.</p>
+
+        <h2>2. Server-Side Encryption (Not Zero-Knowledge)</h2>
+        <p>The API response for "encrypted" Vault files includes an Initialization Vector (IV) stored directly in the database row:</p>
+        
+        <pre>{
+    "is_encrypted": 1,
+    "iv": "TM49hT8aKz73V8iP"
+}</pre>
+
+        <p>In a true client-side Zero-Knowledge architecture, the server should receive a single encrypted blob and should not be managing the IV separately. The presence of this field indicates that Drime is using standard Server-Side Encryption (likely via the Laravel PHP framework). This implies that <strong>Drime holds the encryption keys on their server</strong> and can technically decrypt user files at will.</p>
+
+        <h2>3. The "Vault" is a UI Gate</h2>
+        <p>When accessing the Vault, the API returns a password verification hash to the client:</p>
+        <pre>"check": "VqpUxQg3x4kJB2aKekAR6KQi15X476qvp1dtMQ=="</pre>
+        
+        <p>This suggests that the "Vault" protection is a UI-based restriction. The server verifies the password hash and then grants access. Since the server holds the encryption keys (as proven by point #2), a rogue admin can bypass this password check entirely to access the files.</p>
+
+        <h2>4. Artificial Data Inflation</h2>
+        <p>By analyzing the sequential database IDs exposed by the BeDrive architecture, we can estimate the actual size of the platform versus the implied size.</p>
+
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Observed ID</th>
+                <th>Interpretation</th>
+            </tr>
+            <tr>
+                <td><strong>Vault Files</strong></td>
+                <td>~34,446</td>
+                <td>The total number of files ever uploaded to the Vault system-wide is only ~34k. This indicates extremely low usage.</td>
+            </tr>
+            <tr>
+                <td><strong>Regular Files</strong></td>
+                <td>~482,280,015</td>
+                <td>This number appears artificially inflated. Given the user ID count (~19k), this would imply 25,000 files per user, which is statistically improbable.</td>
+            </tr>
+        </table>
+        <p>Actual number of files ever uploaded is probably somewhere around ~2,280,015(without vault).</p>
+        <p>It appears the database auto-increment counter was manually set to a high number for regular files to create the appearance of scale, but the admins neglected to inflate the Vault file counter.</p>
+        <h2>Final Conclusion</h2>
+        <p>Drime is not a trustable or honest company. The Drime founder constantly twists and switches their definitions of E2EE to suit the situation. Their narrative regarding "Zero Knowledge" has shifted repeatedly when challenged:</p>
+    
+        <ul>
+            <li><strong>Marketing Claim:</strong> "Zero Knowledge... Only you can see your files. Not us, not anyone else."</li>
+            <li><strong>First Denial:</strong> "We never claimed 'Zero Knowledge'."</li>
+            <li><strong>Final Admission:</strong> "We did have a header saying we have 'Zero Knowledge' but we removed it."</li>
+        </ul>
+
+        <p>Beyond these verbal inconsistencies, the technical architecture proves the deception. Drime is running a white-labeled instance of a <strong>$29 generic script (BeDrive)</strong>. Because the server stores the salt, the password verification hash, and the per-file IVs, the system is fundamentally <strong>not End-to-End Encrypted</strong>.</p>
+        
+        <p><strong>Using Drime is like using Google Drive or Dropbox.</strong> The service provider holds the keys to your data and can access it at any time (e.g., internal snooping). The critical difference is that Google and Dropbox do not falsely advertise themselves as "Zero-Knowledge" privacy vaults, nor do they run on generic template scripts with artificial statistics.</p>
+        
+        <p>If the server can validate that a password is correct (via the "check" hash) and holds the encryption IVs, the server possesses the ability to derive the keys and decrypt the files. This is standard <strong>Encryption-at-Rest</strong> masquerading as a military-grade privacy vault.</p>
+        
+        <p><strong>Verdict:</strong> Drime is not E2EE and users seeking genuine privacy or protection from server-side data breaches should avoid Drime Cloud entirely.</p>
+    </div>
 
     <hr>
-    <p><small>This analysis was conducted in October 2025. All evidence has been archived and is available for verification. For questions or additional information, please refer to the accompanying repository.</small></p>
+    <p><small>This analysis was conducted in October and updated November 2025. All evidence has been archived and is available for verification.</small></p>
+    <p style="text-align: center; margin-top: 30px;"><strong>Contact:</strong> <a href="mailto:sylphie@tuta.io">sylphie@tuta.io</a></p>
 </body>
 </html>
