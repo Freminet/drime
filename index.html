@@ -65,8 +65,24 @@
         .note {
             background: #fff3cd;
             border: 1px solid #ffc107;
-            padding: 15px;
+            padding: 20px;
             margin: 20px 0;
+            border-radius: 4px;
+        }
+        .note ul {
+            margin-bottom: 10px;
+            padding-left: 20px;
+        }
+        .note li {
+            margin-bottom: 5px;
+        }
+        .note strong {
+            color: #856404;
+        }
+        .note a {
+            color: #856404;
+            text-decoration: underline;
+            font-weight: bold;
         }
         .drime-message {
             background: #fff5f5;
@@ -129,10 +145,20 @@
     <h1>Analysis of Drime Cloud's E2EE and Zero-Knowledge Claims</h1>
     <p class="date">Original Report: October 2025 | Updated: November 2025</p>
 
-    <div class="note">
-        <strong>Status Update:</strong> This report has been updated with significant new findings regarding the underlying software architecture ("BeDrive") and proof of artificial data inflation. See <a href="#part2">"Part 2"</a> below.
-        <br><br>This page isn't made to shame Drime, but to ensure users understand what they're actually getting. 
+   <div class="note">
+        <p><div class="drime-message">It's been over 1 week since I put my email address in this report, Drime has still not replied. Therefore, this report is now complete and archived. Drime is not a company I would recommend to anyone, and they clearly do not respect their customers as they don't even care to respond.<br>Drime is committing <strong>Deceptive Commercial Practices</strong>, <strong>Fraud</strong>, <strong>GDPR Violations</strong>, and <strong>EU Digital Content Directive</strong> violations. <br>Explained down below.</div></p>
+        <p><strong>Status Update:</strong> This report has been updated with significant new findings regarding the underlying software architecture ("BeDrive") and proof of artificial data inflation. See <a href="#part2">"Part 2"</a> below.</p>
+        <p>This page isn't made to shame Drime, but to ensure users understand what they're actually getting. </p>
+        <hr style="border: 0; border-top: 1px solid #dfc067; margin: 15px 0;">
+        
+        <p><strong>⚠️ WARNING:</strong> The technical evidence collected in this report indicates that Drime Cloud is engaging in behavior that meets the legal definitions of <br><strong>Deceptive Commercial Practices</strong>, <br><strong>Fraud</strong>, <br><strong>GDPR Violations</strong> (specifically Transparency, Integrity, Confidentiality, and misrepresentation of 'Military-Grade' security measures), <br>and violations of the <br><strong>EU Digital Content Directive</strong> (Directive (EU) 2019/770 regarding Service Non-Conformity).</p>
+        
+        <div style="text-align: center;">
+            <a href="#more">See more and where to report</a>
+            <p>This report is based on publicly observable technical evidence. Any attempts to remove, censor, or interfere with the publication of this analysis will be documented and may be disclosed to relevant regulatory authorities as potential attempts to obstruct public-interest reporting.</p>
+        </div>
     </div>
+
     <div class="drime-message">
         <h3>Drime lies about contacting me</h3>
         <img src="screenshots/reddit_comment2.png" alt="Screenshot of Drime's Reddit Comment" class="evidence-image" style="border: 1px solid #ffcdd2;">
@@ -386,7 +412,7 @@
         <h1>Part 2: Investigation Update (November 2025)</h1>
         
         <h2>The "BeDrive" Connection</h2>
-        <p>Following the initial report, further API analysis has identified that Drime Cloud appears to be running a white-labeled version of <strong>BeDrive</strong>, a generic PHP file-sharing script available on CodeCanyon for approximately $29. The API endpoints and backend structure match BeDrive's architecture by approximately 95-98%.</p>
+        <p>Following the initial report, further API analysis has identified that Drime Cloud appears to be running a white-labeled version of <strong>BeDrive</strong>, a generic PHP file-sharing script available on CodeCanyon for approximately $29. The API endpoints and backend structure match BeDrive's architecture closely (with exception of the vault feature).</p>
 
         <h2>1. The "Military-Grade" Hash Analysis</h2>
         <p>The file identifiers used by Drime are not cryptographically secure hashes. The API returns a "hash" field that, when analyzed, reveals simple obfuscation rather than encryption.</p>
@@ -401,7 +427,8 @@
         <pre>public function getHashAttribute(): string {
     return trim(base64_encode(str_pad($this->getRawOriginal('id').'|', 10, 'padding')), '=');
 }</pre>
-        
+        <img src="screenshots/bedrive_padding.png" alt="Screenshot of Drime(orange text) and BeDrive" class="evidence-image">
+        <p>Drime's API response in the orange text, and BeDrive's backend source code.</p>
         <p>This proves that the "secure hash" is merely the sequential database ID encoded in Base64. It is reversible and allows for enumeration of files.</p>
 
         <h2>2. Server-Side Encryption (Not Zero-Knowledge)</h2>
@@ -458,6 +485,48 @@
         <p>If the server can validate that a password is correct (via the "check" hash) and holds the encryption IVs, the server possesses the ability to derive the keys and decrypt the files. This is standard <strong>Encryption-at-Rest</strong> masquerading as a military-grade privacy vault.</p>
         
         <p><strong>Verdict:</strong> Drime is not E2EE and users seeking genuine privacy or protection from server-side data breaches should avoid Drime Cloud entirely.</p>
+    </div>
+
+    <div class="note" id="more">
+        <h3>⚠️ Detailed Legal & Regulatory Violations (France/EU)</h3>
+        <p>Drime Cloud operates from France. The evidence collected in this report suggests the company is currently in violation of the following laws:</p>
+        
+        <ul>
+            <li>
+                <strong>Misleading Commercial Practices (Code de la consommation, Art. L121-2):</strong> 
+                It is illegal to deceive consumers about the "essential characteristics" of a product. 
+                <br><em>The Violation:</em> Marketing "Zero-Knowledge" encryption when the server holds the keys, and engaging in <strong>Artificial Data Inflation</strong> (manipulating database counters to display ~482 million regular file uploads, despite the auto-increment IDs showing only ~34,000 Vault files, the extreme discrepancy (34k vs 482M) indicates the regular file counter was artificially inflated) to create false social proof.
+                <img src="screenshots/vault_files.png" alt="Screenshot of Drime's Vault Files Count" class="evidence-image">
+                <img src="screenshots/regular_files.png" alt="Screenshot of Drime's Regular(outside vault) Files Count" class="evidence-image">
+            </li>
+            
+            <li>
+                <strong>Fraud (Code Pénal, Art. 313-1):</strong> 
+                Defined as using "fraudulent maneuvers" to deceive a person into handing over funds.
+                <br><em>The Violation:</em> The deliberate alteration of database auto-increment IDs to inflate platform statistics is a technical maneuver designed to manufacture credibility. Furthermore, <strong>continuing to advertise "Zero Knowledge" and "End-to-End Encryption"</strong>, despite technical proof in this document that the server retains access to data, serves as a calculated deception to trick users into purchasing subscriptions based on security features that do not exist.
+            </li>
+
+            <li>
+                <strong>GDPR Violations (Articles 5 & 32):</strong> 
+                <br><em>The Violation:</em> Lack of transparency and security. Telling users "Only you can see your files" while transmitting file names, types, and sizes in plaintext to the server is a fundamental breach of European data privacy laws.<br>Moreover, as of 11/28/2025, Drime is still advertising their service as "zero knowledge".
+                <img src="screenshots/zero_knowledge_google.png" alt="Screenshot of Drime's Zero Knowledge Google Search Result" class="evidence-image">
+                <img src="screenshots/zero_knowledge_drime_page.png" alt="Screenshot of Drime's Zero Knowledge Page" class="evidence-image">
+            </li>
+        </ul>
+
+        <p><strong>Where to Report These Violations:</strong></p>
+        <ul>
+            <li>
+                <strong>For Fraud, Fake Statistics, and False Advertising:</strong><br> 
+                File a report with the DGCCRF (French fraud control): 
+                <a href="https://signal.conso.gouv.fr/en" target="_blank">SignalConso</a>
+            </li>
+            <li>
+                <strong>For Privacy Lies and GDPR Breaches:</strong><br> 
+                File a complaint with the Data Protection Authority: 
+                <a href="https://www.cnil.fr/fr/adresser-une-plainte" target="_blank">CNIL (Commission Nationale de l'Informatique et des Libertés)</a>
+            </li>
+        </ul>
     </div>
 
     <hr>
