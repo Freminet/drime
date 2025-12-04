@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -146,12 +147,24 @@
     <p class="date">Original Report: October 2025 | Updated: November 2025</p>
 
    <div class="note">
-        <p><div class="drime-message">It's been over 1 week since I put my email address in this report, Drime has still not replied. Therefore, this report is now complete and archived. Drime is not a company I would recommend to anyone, and they clearly do not respect their customers as they don't even care to respond.<br>Drime is committing <strong>Deceptive Commercial Practices</strong>, <strong>Fraud</strong>, <strong>GDPR Violations</strong>, and <strong>EU Digital Content Directive</strong> violations. <br>Explained down below.</div></p>
+        <p><div class="drime-message">
+            Drime has now contacted me after a week of silence. My email to them can be found <a href="https://imgur.com/a/iHo53p8">here</a>.<br>
+            <p><strong>Correction:</strong> Based on their technical feedback, I have removed the specific claims about the IV and server-side keys.
+    
+                <p><strong>However, the core issue remains:</strong> Drime violates the consumer expectation of E2EE because <strong>metadata is not encrypted</strong>.</p>
+                
+                <p>In their email, Drime characterizes their false "Zero-Knowledge" advertising as a <img src="screenshots/mistake.png" class="evidence-image">"mistake" by a non-technical team member. This excuse is unacceptable for a security company:</p>
+                <ul>
+                    <li><strong>"Zero-Knowledge" is a specific architectural definition</strong>, not a vague marketing adjective like "fast" or "easy".</li>
+                    <li>To advertise a product as "Zero-Knowledge" when the server can read filenames, directory structures, and file sizes is to <strong>fundamentally misrepresent the product's identity</strong>.</li>
+                    <li>Attributing this to a "copywriting error" implies gross negligence. A privacy company should not allow non-technical staff to invent security features that do not exist.</li>
+                </ul>
+        </div></p>
         <p><strong>Status Update:</strong> This report has been updated with significant new findings regarding the underlying software architecture ("BeDrive") and proof of artificial data inflation. See <a href="#part2">"Part 2"</a> below.</p>
         <p>This page isn't made to shame Drime, but to ensure users understand what they're actually getting. </p>
         <hr style="border: 0; border-top: 1px solid #dfc067; margin: 15px 0;">
         
-        <p><strong>⚠️ WARNING:</strong> The technical evidence collected in this report indicates that Drime Cloud is engaging in behavior that meets the legal definitions of <br><strong>Deceptive Commercial Practices</strong>, <br><strong>Fraud</strong>, <br><strong>GDPR Violations</strong> (specifically Transparency, Integrity, Confidentiality, and misrepresentation of 'Military-Grade' security measures), <br>and violations of the <br><strong>EU Digital Content Directive</strong> (Directive (EU) 2019/770 regarding Service Non-Conformity).</p>
+        <p><strong>⚠️ WARNING:</strong> The technical evidence collected in this report indicates that Drime Cloud is engaging in behavior that meets the legal definitions of <br><strong>Deceptive Commercial Practices</strong>, <br><strong>GDPR Violations</strong> (specifically Transparency, Integrity, Confidentiality, and misrepresentation of 'Military-Grade' security measures), <br>and violations of the <strong>EU Digital Content Directive</strong> (Directive (EU) 2019/770 regarding Service Non-Conformity).</p>
         
         <div style="text-align: center;">
             <a href="#more">See more</a>
@@ -171,32 +184,11 @@
             <li><strong>The Impossibility:</strong> It is physically impossible for Drime to have emailed me "multiple times" before November because the contact method did not exist. Unless Drime has found a way to send emails to the future, their claim is a lie designed to discredit this research.</li>
             <li><strong>The "Document":</strong> If Drime actually possesses a "detailed response document" that refutes these technical findings, they are free to publish it publicly. Hiding it behind a claim of "unanswered emails" suggests the document does not exist.</li>
         </ul>
-    </div>
 
-    <div class="drime-message">
-        <h3>Message to Drime</h3>
-        
-        <!-- Placeholder for Reddit Comment Screenshot -->
-        <img src="screenshots/reddit_comment.png" alt="Screenshot of Drime's Reddit Comment" class="evidence-image" style="border: 1px solid #ffcdd2;">
-        
-        <p><strong>You said:</strong> "Only metadata is not E2EE for technical reasons."</p>
-        <p><strong>Translation:</strong> "The $29 script we bought (BeDrive) wasn't built to encrypt filenames, and we don't know how to rewrite the core database logic to fix it."</p>
-        <hr style="border: 0; border-top: 1px dashed #ffcdd2; margin: 20px 0;">
-        
-        <p>The claim that 'File contents are fully E2EE and cannot be read server-side' contradicts the API evidence:</p>
-        
-        <ul>
-            <li><strong>The IV:</strong> The API returns an exposed <code>iv</code> (Initialization Vector) field in the database row. In true Client-Side E2EE, the IV is bundled into the encrypted blob and managed by the client. An exposed database IV is the hallmark of Server-Side Encryption (standard Laravel/PHP encryption).</li>
-            
-            <li><strong>Keys:</strong> If the server is generating/storing the IV and validating the password hash (<code>check</code> field), the server is an active participant in the cryptography. This means the server holds the keys.</li>
-            
-            <li><strong>Meaning?:</strong> While you can theoretically have E2EE with plaintext metadata, you are conflating 'End-to-End Encryption' with 'Encryption at Rest.' If the server holds the keys (which the BeDrive architecture does), it is Encryption at Rest, not E2EE.</li>
-        </ul>
-        <p>If the server stores the salt, the password check, and the per-file IVs and can validate whether the vault password is correct, then the server can derive the encryption key and decrypt the files. That means the system is not end-to-end encrypted, even if the metadata or file contents are encrypted.</p>
-        <p>Drime founder doesn't seem to know the difference between E2EE and Encryption at Rest.</p>
-        <p><strong>Please explain why the database stores a separate IV if the encryption is truly happening entirely on the client device.</strong></p>
-        <p style="margin-top: 20px;">
-            If you would like to discuss these findings, please <a href="mailto:sylphie@tuta.io">email me</a> or open a GitHub issue in the <a href="https://github.com/Freminet/drime/issues">repository</a>.
+        <p>
+            <strong>UPDATE:</strong> Drime has since provided screenshots of emails they claim to have sent, saying that someone else was contacting them before and that they thought that was me. However, the recipient address in the screenshots was censored. Since I never received these emails and the address was not verified, this claim remains unverified.
+            <img src="screenshots/mistake.png" class="evidence-image">
+            <p>It can be seen here that the email address is censored.</p>
         </p>
     </div>
 
@@ -431,23 +423,24 @@
         <p>Drime's API response in the orange text, and BeDrive's backend source code.</p>
         <p>This proves that the "secure hash" is merely the sequential database ID encoded in Base64. It is reversible and allows for enumeration of files.</p>
 
-        <h2>2. Server-Side Encryption (Not Zero-Knowledge)</h2>
-        <p>The API response for "encrypted" Vault files includes an Initialization Vector (IV) stored directly in the database row:</p>
-        
-        <pre>{
-    "is_encrypted": 1,
-    "iv": "TM49hT8aKz73V8iP"
-}</pre>
+        <h2>2. Active "Zero Knowledge" Deception</h2>
+        <p>Drime claimed they "scanned the whole site" to remove incorrect Zero Knowledge claims. This is false.</p>
+        <p>As of 4th December 2025, their official blog post <em>"7 Most Secure End-to-End Encrypted Cloud Storage Services Tested in 2025"</em> <strong>still explicitly lists Drime as "Zero Knowledge".</strong></p>
+        <p>Link: <a href="https://drime.cloud/blog-posts/7-most-secure-end-to-end-encrypted-cloud-storage-services-tested-in-2025" target="_blank">Drime Blog Post</a></p>
+        <p>Continuing to advertise this feature while admitting the architecture does not support it constitutes a Deceptive Commercial Practice.</p>
 
-        <p>In a true client-side Zero-Knowledge architecture, the server should receive a single encrypted blob and should not be managing the IV separately. The presence of this field indicates that Drime is using standard Server-Side Encryption (likely via the Laravel PHP framework). This implies that <strong>Drime holds the encryption keys on their server</strong> and can technically decrypt user files at will.</p>
-
-        <h2>3. The "Vault" is a UI Gate</h2>
-        <p>When accessing the Vault, the API returns a password verification hash to the client:</p>
-        <pre>"check": "VqpUxQg3x4kJB2aKekAR6KQi15X476qvp1dtMQ=="</pre>
-        
-        <p>This suggests that the "Vault" protection is a UI-based restriction. The server verifies the password hash and then grants access. Since the server holds the encryption keys (as proven by point #2), a rogue admin can bypass this password check entirely to access the files.</p>
-
-        <h2>4. Artificial Data Inflation</h2>
+        <h2>3. Encryption Architecture</h2>
+        <p>Update: Following technical disclosure from Drime, I accept that keys are derived client-side. The presence of the IV in the database is standard for this architecture. I have retracted the claim that Drime holds the keys directly.</p>
+        <div class="note">
+            <h3>New Finding: Weak Encryption Parameters (Below OWASP Standards)</h3>
+            <p>While Drime does not "hold" the key, Drime has confirmed they use <strong>PBKDF2-HMAC-SHA256</strong> with <strong>250,000 iterations</strong>.</p>
+            <ul>
+                <li><strong>The Standard:</strong> Current OWASP guidelines recommend a minimum of <strong>600,000 iterations</strong> for this algorithm. Drime uses less than half.</li>
+                <li><strong>The Vulnerability:</strong> Unlike Proton (SRP+bcrypt) or Tresorit (scrypt), PBKDF2 is vulnerable to GPU acceleration.</li>
+                <li><strong>The Risk:</strong> Drime permits <strong>8-character passwords</strong>. An 8-character password hashed with only 250k iterations of PBKDF2 is trivial to crack via offline brute-force if the database is compromised.</li>
+            </ul>
+        </div>
+        <h2>4. Suspected Artificial Data Inflation</h2>
         <p>By analyzing the sequential database IDs exposed by the BeDrive architecture, we can estimate the actual size of the platform versus the implied size.</p>
 
         <table>
@@ -467,7 +460,7 @@
                 <td>This number appears artificially inflated. Given the user ID count (~19k), this would imply 25,000 files per user, which is statistically improbable.</td>
             </tr>
         </table>
-        <p>Actual number of files ever uploaded is probably somewhere around ~2,280,015(without vault).</p>
+        <p>Actual number of files ever uploaded is probably somewhere around ~2,280,015 (without vault).</p>
         <p>It appears the database auto-increment counter was manually set to a high number for regular files to create the appearance of scale, but the admins neglected to inflate the Vault file counter.</p>
         <h2>Final Conclusion</h2>
         <p>Drime is not a trustable or honest company. The Drime founder constantly twists and switches their definitions of E2EE to suit the situation. Their narrative regarding "Zero Knowledge" has shifted repeatedly when challenged:</p>
@@ -478,13 +471,9 @@
             <li><strong>Final Admission:</strong> "We did have a header saying we have 'Zero Knowledge' but we removed it."</li>
         </ul>
 
-        <p>Beyond these verbal inconsistencies, the technical architecture proves the deception. Drime is running a white-labeled instance of a <strong>$29 generic script (BeDrive)</strong>. Because the server stores the salt, the password verification hash, and the per-file IVs, the system is fundamentally <strong>not End-to-End Encrypted</strong>.</p>
-        
-        <p><strong>Using Drime is like using Google Drive or Dropbox.</strong> The service provider holds the keys to your data and can access it at any time (e.g., internal snooping). The critical difference is that Google and Dropbox do not falsely advertise themselves as "Zero-Knowledge" privacy vaults, nor do they run on generic template scripts with artificial statistics.</p>
-        
-        <p>If the server can validate that a password is correct (via the "check" hash) and holds the encryption IVs, the server possesses the ability to derive the keys and decrypt the files. This is standard <strong>Encryption-at-Rest</strong> masquerading as a military-grade privacy vault.</p>
-        
-        <p><strong>Verdict:</strong> Drime is not E2EE and users seeking genuine privacy or protection from server-side data breaches should avoid Drime Cloud entirely.</p>
+        <p>Beyond these verbal inconsistencies, the technical architecture proves the deception. Drime is running a white-labeled instance of a <strong>$29 generic script (BeDrive)</strong>.</p>
+                        
+        <p><strong>Verdict:</strong> Drime is not trustable and users seeking genuine privacy or protection from server-side data breaches should avoid Drime Cloud entirely.</p>
     </div>
 
     <div class="note" id="more">
@@ -495,15 +484,9 @@
             <li>
                 <strong>Misleading Commercial Practices (Code de la consommation, Art. L121-2):</strong> 
                 It is illegal to deceive consumers about the "essential characteristics" of a product. 
-                <br><em>The Violation:</em> Marketing "Zero-Knowledge" encryption when the server holds the keys, and engaging in <strong>Artificial Data Inflation</strong> (manipulating database counters to display ~482 million regular file uploads, despite the auto-increment IDs showing only ~34,000 Vault files, the extreme discrepancy (34k vs 482M) indicates the regular file counter was artificially inflated) to create false social proof.
+                <br><em>The Violation:</em> Marketing "Zero-Knowledge" encryption, and engaging in <strong>Suspected Artificial Data Inflation</strong> (manipulating database counters to display ~482 million regular file uploads, despite the auto-increment IDs showing only ~34,000 Vault files, the extreme discrepancy (34k vs 482M) indicates the regular file counter was artificially inflated) to create false social proof.
                 <img src="screenshots/vault_files.png" alt="Screenshot of Drime's Vault Files Count" class="evidence-image">
                 <img src="screenshots/regular_files.png" alt="Screenshot of Drime's Regular(outside vault) Files Count" class="evidence-image">
-            </li>
-            
-            <li>
-                <strong>Fraud (Code Pénal, Art. 313-1):</strong> 
-                Defined as using "fraudulent maneuvers" to deceive a person into handing over funds.
-                <br><em>The Violation:</em> The deliberate alteration of database auto-increment IDs to inflate platform statistics is a technical maneuver designed to manufacture credibility. Furthermore, <strong>continuing to advertise "Zero Knowledge" and "End-to-End Encryption"</strong>, despite technical proof in this document that the server retains access to data, serves as a calculated deception to trick users into purchasing subscriptions based on security features that do not exist.
             </li>
 
             <li>
